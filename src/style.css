@@ -107,6 +107,7 @@ h1 {
     'text1 text2'
     'diff diff';
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  min-width: 0;
 }
 
 .compare-panel-left {
@@ -119,6 +120,10 @@ h1 {
 
 .compare-diff-panel {
   grid-area: diff;
+}
+
+#compare-section {
+  overflow-x: auto;
 }
 
 .panel {
@@ -351,7 +356,7 @@ details:not([open]) > summary::before {
   margin-top: 0.8rem;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(253, 252, 248, 0.84);
   padding: 0;
   overflow: auto;
   flex: 1;
@@ -361,34 +366,117 @@ details:not([open]) > summary::before {
   line-height: 1.5;
 }
 
-.diff-line {
+.compare-tools {
+  margin-top: 0.75rem;
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.35rem 0.8rem;
-  border-bottom: 1px solid rgba(24, 32, 37, 0.08);
+  flex-wrap: wrap;
+  gap: 0.8rem 1rem;
+  font-size: 0.84rem;
+  color: rgba(24, 32, 37, 0.84);
 }
 
-.diff-line.same {
-  background: rgba(255, 255, 255, 0.3);
-  color: rgba(24, 32, 37, 0.8);
+.compare-tools label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
 }
 
-.diff-line.changed {
-  background: rgba(179, 38, 30, 0.12);
-  color: #6b2b1f;
+.compare-tools input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
+.diff-grid {
+  min-width: 680px;
+}
+
+.diff-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: rgba(31, 52, 56, 0.93);
+  color: #f8fbfb;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.diff-head span {
+  padding: 0.45rem 0.8rem;
+}
+
+.diff-head span + span {
+  border-left: 1px solid rgba(245, 251, 255, 0.2);
+}
+
+.diff-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.diff-row + .diff-row {
+  border-top: 1px solid rgba(24, 32, 37, 0.08);
+}
+
+.diff-cell {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.34rem 0.75rem;
+}
+
+.diff-cell + .diff-cell {
+  border-left: 1px solid rgba(24, 32, 37, 0.09);
 }
 
 .line-no {
-  min-width: 3.2rem;
   text-align: right;
-  color: rgba(24, 32, 37, 0.5);
-  flex-shrink: 0;
+  color: rgba(24, 32, 37, 0.48);
+  user-select: none;
 }
 
 .line-content {
-  word-break: break-all;
-  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.row-same .diff-cell {
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(24, 32, 37, 0.86);
+}
+
+.row-added .diff-cell.right {
+  background: rgba(28, 132, 92, 0.2);
+  color: #0f4f39;
+}
+
+.row-added .diff-cell.left {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.row-removed .diff-cell.left {
+  background: rgba(198, 59, 43, 0.2);
+  color: #69241a;
+}
+
+.row-removed .diff-cell.right {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.row-modified .diff-cell.left,
+.row-modified .diff-cell.right {
+  background: rgba(231, 170, 50, 0.2);
+  color: #5f4302;
+}
+
+.word-added {
+  background: rgba(28, 132, 92, 0.24);
+  border-radius: 4px;
+}
+
+.word-removed {
+  background: rgba(198, 59, 43, 0.24);
+  border-radius: 4px;
 }
 
 @keyframes rise {
@@ -424,10 +512,15 @@ details:not([open]) > summary::before {
 
   .compare-layout {
     grid-template-areas:
-      'text1'
-      'text2'
-      'diff';
-    grid-template-rows: auto auto auto;
+      'text1 text2'
+      'diff diff';
+    grid-template-columns: minmax(340px, 1fr) minmax(340px, 1fr);
+    grid-template-rows: auto auto;
+    min-width: 760px;
+  }
+
+  .diff-grid {
+    min-width: 760px;
   }
 
   textarea {

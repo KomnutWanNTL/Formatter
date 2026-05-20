@@ -120,6 +120,15 @@
         <article class="panel compare-diff-panel">
           <div class="panel-head">
             <h2>Text Compare</h2>
+            <div class="actions">
+              <button id="compare-swap" class="muted">Swap</button>
+              <button id="compare-clear-both" class="ghost">Clear Both</button>
+            </div>
+          </div>
+          <div class="compare-tools">
+            <label><input type="checkbox" id="compare-ignore-space" /> Ignore whitespace</label>
+            <label><input type="checkbox" id="compare-ignore-case" /> Ignore case</label>
+            <label><input type="checkbox" id="compare-hide-same" /> Hide unchanged</label>
           </div>
           <div id="compare-output" class="compare-output"></div>
           <p class="status" id="compare-status-left">Ready to compare</p>

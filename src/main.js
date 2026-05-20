@@ -15,6 +15,11 @@ const compareOutput = document.querySelector('#compare-output');
 const compareStatusLeft = document.querySelector('#compare-status-left');
 const compareClearLeft = document.querySelector('#compare-clear-left');
 const compareClearRight = document.querySelector('#compare-clear-right');
+const compareSwapBtn = document.querySelector('#compare-swap');
+const compareClearBothBtn = document.querySelector('#compare-clear-both');
+const compareIgnoreSpace = document.querySelector('#compare-ignore-space');
+const compareIgnoreCase = document.querySelector('#compare-ignore-case');
+const compareHideSame = document.querySelector('#compare-hide-same');
 
 const sqlInput = document.querySelector('#sql-input');
 const sqlOutput = document.querySelector('#sql-output');
@@ -311,22 +316,184 @@ modeButtons.forEach((btn) => {
 });
 
 // ==================== TEXT COMPARE ====================
-function computeDiff(lines1, lines2) {
-  const maxLen = Math.max(lines1.length, lines2.length);
-  const result = [];
+function normalizeLine(value, ignoreWhitespace, ignoreCase) {
+  let normalized = value;
 
-  for (let i = 0; i < maxLen; i++) {
-    const line1 = lines1[i] || '';
-    const line2 = lines2[i] || '';
+  if (ignoreWhitespace) {
+    normalized = normalized.replace(/\s+/g, ' ').trim();
+  }
 
-    if (line1 === line2) {
-      result.push({ type: 'same', line1, line2 });
-    } else {
-      result.push({ type: 'changed', line1, line2 });
+  if (ignoreCase) {
+    normalized = normalized.toLowerCase();
+  }
+
+  return normalized;
+}
+
+function buildLcsTable(seq1, seq2) {
+  const rows = seq1.length;
+  const cols = seq2.length;
+  const table = Array.from({ length: rows + 1 }, () => Array(cols + 1).fill(0));
+
+  for (let i = 1; i <= rows; i++) {
+    for (let j = 1; j <= cols; j++) {
+      if (seq1[i - 1] === seq2[j - 1]) {
+        table[i][j] = table[i - 1][j - 1] + 1;
+      } else {
+        table[i][j] = Math.max(table[i - 1][j], table[i][j - 1]);
+      }
     }
   }
 
-  return result;
+  return table;
+}
+
+function mergeChangeBlocks(operations) {
+  const merged = [];
+  let idx = 0;
+
+  while (idx < operations.length) {
+    const current = operations[idx];
+
+    if (current.type === 'same') {
+      merged.push(current);
+      idx += 1;
+      continue;
+    }
+
+    const removedLines = [];
+    const addedLines = [];
+
+    while (idx < operations.length && operations[idx].type !== 'same') {
+      if (operations[idx].type === 'removed') {
+        removedLines.push(operations[idx].left);
+      }
+
+      if (operations[idx].type === 'added') {
+        addedLines.push(operations[idx].right);
+      }
+
+      idx += 1;
+    }
+
+    const pairCount = Math.min(removedLines.length, addedLines.length);
+
+    for (let pairIdx = 0; pairIdx < pairCount; pairIdx++) {
+      merged.push({
+        type: 'modified',
+        left: removedLines[pairIdx],
+        right: addedLines[pairIdx]
+      });
+    }
+
+    for (let removeIdx = pairCount; removeIdx < removedLines.length; removeIdx++) {
+      merged.push({ type: 'removed', left: removedLines[removeIdx], right: '' });
+    }
+
+    for (let addIdx = pairCount; addIdx < addedLines.length; addIdx++) {
+      merged.push({ type: 'added', left: '', right: addedLines[addIdx] });
+    }
+  }
+
+  return merged;
+}
+
+function computeLineDiff(lines1, lines2, options) {
+  const normalized1 = lines1.map((line) => normalizeLine(line, options.ignoreWhitespace, options.ignoreCase));
+  const normalized2 = lines2.map((line) => normalizeLine(line, options.ignoreWhitespace, options.ignoreCase));
+  const table = buildLcsTable(normalized1, normalized2);
+  const operations = [];
+
+  let i = normalized1.length;
+  let j = normalized2.length;
+
+  while (i > 0 && j > 0) {
+    if (normalized1[i - 1] === normalized2[j - 1]) {
+      operations.push({ type: 'same', left: lines1[i - 1], right: lines2[j - 1] });
+      i -= 1;
+      j -= 1;
+    } else if (table[i - 1][j] >= table[i][j - 1]) {
+      operations.push({ type: 'removed', left: lines1[i - 1], right: '' });
+      i -= 1;
+    } else {
+      operations.push({ type: 'added', left: '', right: lines2[j - 1] });
+      j -= 1;
+    }
+  }
+
+  while (i > 0) {
+    operations.push({ type: 'removed', left: lines1[i - 1], right: '' });
+    i -= 1;
+  }
+
+  while (j > 0) {
+    operations.push({ type: 'added', left: '', right: lines2[j - 1] });
+    j -= 1;
+  }
+
+  operations.reverse();
+
+  return mergeChangeBlocks(operations);
+}
+
+function tokenizeWords(line) {
+  const tokens = line.match(/\s+|[^\s\w]+|\w+/g);
+  return tokens || [];
+}
+
+function buildInlineDiff(leftLine, rightLine, options) {
+  const leftTokens = tokenizeWords(leftLine);
+  const rightTokens = tokenizeWords(rightLine);
+  const norm = (token) => normalizeLine(token, options.ignoreWhitespace, options.ignoreCase);
+  const normLeft = leftTokens.map(norm);
+  const normRight = rightTokens.map(norm);
+  const table = buildLcsTable(normLeft, normRight);
+
+  let i = normLeft.length;
+  let j = normRight.length;
+  const leftHtml = [];
+  const rightHtml = [];
+
+  while (i > 0 && j > 0) {
+    if (normLeft[i - 1] === normRight[j - 1]) {
+      leftHtml.push(escapeHtml(leftTokens[i - 1]));
+      rightHtml.push(escapeHtml(rightTokens[j - 1]));
+      i -= 1;
+      j -= 1;
+    } else if (table[i - 1][j] >= table[i][j - 1]) {
+      leftHtml.push(`<span class="word-removed">${escapeHtml(leftTokens[i - 1])}</span>`);
+      i -= 1;
+    } else {
+      rightHtml.push(`<span class="word-added">${escapeHtml(rightTokens[j - 1])}</span>`);
+      j -= 1;
+    }
+  }
+
+  while (i > 0) {
+    leftHtml.push(`<span class="word-removed">${escapeHtml(leftTokens[i - 1])}</span>`);
+    i -= 1;
+  }
+
+  while (j > 0) {
+    rightHtml.push(`<span class="word-added">${escapeHtml(rightTokens[j - 1])}</span>`);
+    j -= 1;
+  }
+
+  return {
+    leftHtml: leftHtml.reverse().join('') || '&nbsp;',
+    rightHtml: rightHtml.reverse().join('') || '&nbsp;'
+  };
+}
+
+function renderCell(lineNo, html, side, rowType) {
+  const safeLineNo = lineNo === '' ? '&nbsp;' : lineNo;
+  const safeContent = html || '&nbsp;';
+  return `
+    <div class="diff-cell ${side} ${rowType}">
+      <span class="line-no">${safeLineNo}</span>
+      <span class="line-content">${safeContent}</span>
+    </div>
+  `;
 }
 
 function renderCompare() {
@@ -334,41 +501,111 @@ function renderCompare() {
   const text2 = compareRight.value;
 
   if (!text1 && !text2) {
-    compareOutput.innerHTML = '<p class="empty">Paste text on the left to compare.</p>';
+    compareOutput.innerHTML = '<p class="empty">Paste text in both sides to compare.</p>';
     compareStatusLeft.textContent = 'Ready to compare';
     return;
   }
 
+  const options = {
+    ignoreWhitespace: compareIgnoreSpace.checked,
+    ignoreCase: compareIgnoreCase.checked,
+    hideUnchanged: compareHideSame.checked
+  };
+
   const lines1 = text1.split('\n');
   const lines2 = text2.split('\n');
-  const diffs = computeDiff(lines1, lines2);
+  const diffs = computeLineDiff(lines1, lines2, options);
 
-  const diffHtml = diffs
-    .map((diff, idx) => {
-      if (diff.type === 'same') {
-        return `<div class="diff-line same"><span class="line-no">${idx + 1}</span><span class="line-content">${escapeHtml(diff.line2)}</span></div>`;
-      } else {
-        return `<div class="diff-line changed"><span class="line-no">${idx + 1}</span><span class="line-content">${escapeHtml(diff.line2)}</span></div>`;
+  let leftLineNo = 1;
+  let rightLineNo = 1;
+  let sameCount = 0;
+  let addedCount = 0;
+  let removedCount = 0;
+  let modifiedCount = 0;
+
+  const rows = [];
+
+  diffs.forEach((entry) => {
+    if (entry.type === 'same') {
+      const row = `
+        <div class="diff-row row-same">
+          ${renderCell(leftLineNo, escapeHtml(entry.left), 'left', 'same')}
+          ${renderCell(rightLineNo, escapeHtml(entry.right), 'right', 'same')}
+        </div>
+      `;
+
+      sameCount += 1;
+      leftLineNo += 1;
+      rightLineNo += 1;
+
+      if (!options.hideUnchanged) {
+        rows.push(row);
       }
-    })
-    .join('');
 
-  compareOutput.innerHTML = diffHtml || '<p class="empty">No content to compare.</p>';
+      return;
+    }
 
-  const changedCount = diffs.filter((d) => d.type === 'changed').length;
-  compareStatusLeft.textContent = `${changedCount} difference${changedCount === 1 ? '' : 's'}`;
+    if (entry.type === 'removed') {
+      rows.push(`
+        <div class="diff-row row-removed">
+          ${renderCell(leftLineNo, escapeHtml(entry.left), 'left', 'removed')}
+          ${renderCell('', '&nbsp;', 'right', 'removed')}
+        </div>
+      `);
+      removedCount += 1;
+      leftLineNo += 1;
+      return;
+    }
+
+    if (entry.type === 'added') {
+      rows.push(`
+        <div class="diff-row row-added">
+          ${renderCell('', '&nbsp;', 'left', 'added')}
+          ${renderCell(rightLineNo, escapeHtml(entry.right), 'right', 'added')}
+        </div>
+      `);
+      addedCount += 1;
+      rightLineNo += 1;
+      return;
+    }
+
+    const inlineDiff = buildInlineDiff(entry.left, entry.right, options);
+    rows.push(`
+      <div class="diff-row row-modified">
+        ${renderCell(leftLineNo, inlineDiff.leftHtml, 'left', 'modified')}
+        ${renderCell(rightLineNo, inlineDiff.rightHtml, 'right', 'modified')}
+      </div>
+    `);
+    modifiedCount += 1;
+    leftLineNo += 1;
+    rightLineNo += 1;
+  });
+
+  const diffHtml = `
+    <div class="diff-grid">
+      <div class="diff-head">
+        <span>Original</span>
+        <span>Updated</span>
+      </div>
+      ${rows.join('') || '<p class="empty">No visible differences with current filters.</p>'}
+    </div>
+  `;
+
+  compareOutput.innerHTML = diffHtml;
+  compareStatusLeft.textContent = `${modifiedCount} modified, ${addedCount} added, ${removedCount} removed, ${sameCount} same`;
 }
 
 let compareDebounceId;
-compareLeft.addEventListener('input', () => {
+function scheduleCompareRender() {
   window.clearTimeout(compareDebounceId);
-  compareDebounceId = window.setTimeout(renderCompare, 100);
-});
+  compareDebounceId = window.setTimeout(renderCompare, 80);
+}
 
-compareRight.addEventListener('input', () => {
-  window.clearTimeout(compareDebounceId);
-  compareDebounceId = window.setTimeout(renderCompare, 100);
-});
+compareLeft.addEventListener('input', scheduleCompareRender);
+compareRight.addEventListener('input', scheduleCompareRender);
+compareIgnoreSpace.addEventListener('change', renderCompare);
+compareIgnoreCase.addEventListener('change', renderCompare);
+compareHideSame.addEventListener('change', renderCompare);
 
 compareClearLeft.addEventListener('click', () => {
   compareLeft.value = '';
@@ -380,5 +617,19 @@ compareClearRight.addEventListener('click', () => {
   renderCompare();
 });
 
+compareClearBothBtn.addEventListener('click', () => {
+  compareLeft.value = '';
+  compareRight.value = '';
+  renderCompare();
+});
+
+compareSwapBtn.addEventListener('click', () => {
+  const leftText = compareLeft.value;
+  compareLeft.value = compareRight.value;
+  compareRight.value = leftText;
+  renderCompare();
+});
+
 renderFormattedJson();
 renderFormattedSql();
+renderCompare();

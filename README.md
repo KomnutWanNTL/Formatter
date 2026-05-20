@@ -43,4 +43,8 @@ This command builds the app and publishes `dist/` to the `gh-pages` branch.
 - Copy formatted output and clear input
 - SQL formatter mode focused on T-SQL (MSSQL)
 - Multiple SQL format templates (MSSQL Standard, Compact, Reporting, Wide, ANSI Clean)
+- Text compare mode with side-by-side diff viewer
+- Inline word-level highlight for modified lines
+- Compare options: ignore whitespace, ignore case, hide unchanged
+- Quick compare actions: swap sides and clear both
 - Responsive UI for desktop and mobile
