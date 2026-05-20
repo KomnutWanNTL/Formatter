@@ -11,13 +11,14 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="./assets/index-DvQlkjLY.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-A1w0FBsW.css">
+    <script type="module" crossorigin src="./assets/index-BrfTvcPF.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BbqqUBWf.css">
   </head>
   <body>
     <main class="app-shell">
       <nav class="mode-nav">
         <button class="mode-btn active" data-mode="json">JSON Formatter</button>
+        <button class="mode-btn" data-mode="sql">SQL Formatter</button>
         <button class="mode-btn" data-mode="compare">Text Compare</button>
       </nav>
 
@@ -51,6 +52,49 @@
             </div>
           </div>
           <div id="json-output" class="json-output"></div>
+        </article>
+      </section>
+
+      <section class="split-view" id="sql-section" style="display: none;">
+        <article class="panel left-panel">
+          <div class="panel-head">
+            <h2>SQL Input</h2>
+            <div class="actions">
+              <button id="sql-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <div class="field-row">
+            <label class="field-label" for="sql-template">Template</label>
+            <select id="sql-template">
+              <option value="mssql-standard" selected>MSSQL Standard</option>
+              <option value="mssql-compact">MSSQL Compact</option>
+              <option value="mssql-reporting">MSSQL Reporting</option>
+              <option value="mssql-wide">MSSQL Wide</option>
+              <option value="ansi-clean">ANSI Clean</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label" for="sql-language">Dialect</label>
+            <select id="sql-language">
+              <option value="transactsql" selected>T-SQL (MSSQL)</option>
+              <option value="sql">Standard SQL</option>
+              <option value="mysql">MySQL</option>
+              <option value="postgresql">PostgreSQL</option>
+              <option value="sqlite">SQLite</option>
+            </select>
+          </div>
+          <textarea id="sql-input" spellcheck="false" placeholder="Paste SQL here, e.g. select * from dbo.Users where id=1"></textarea>
+          <p class="status" id="sql-status">Ready</p>
+        </article>
+
+        <article class="panel right-panel">
+          <div class="panel-head">
+            <h2>Formatted SQL</h2>
+            <div class="actions">
+              <button id="sql-copy" class="ghost">Copy</button>
+            </div>
+          </div>
+          <pre id="sql-output" class="sql-output"></pre>
         </article>
       </section>
 
