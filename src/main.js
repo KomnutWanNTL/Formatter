@@ -1,4 +1,5 @@
 import './style.css';
+import { format as formatSql } from 'sql-formatter';
 
 const jsonInput = document.querySelector('#json-input');
 const jsonStatus = document.querySelector('#json-status');
@@ -15,13 +16,23 @@ const compareStatusLeft = document.querySelector('#compare-status-left');
 const compareClearLeft = document.querySelector('#compare-clear-left');
 const compareClearRight = document.querySelector('#compare-clear-right');
 
+const sqlInput = document.querySelector('#sql-input');
+const sqlOutput = document.querySelector('#sql-output');
+const sqlStatus = document.querySelector('#sql-status');
+const sqlTemplate = document.querySelector('#sql-template');
+const sqlLanguage = document.querySelector('#sql-language');
+const sqlClearBtn = document.querySelector('#sql-clear');
+const sqlCopyBtn = document.querySelector('#sql-copy');
+
 const modeButtons = document.querySelectorAll('.mode-btn');
 const jsonSection = document.querySelector('#json-section');
+const sqlSection = document.querySelector('#sql-section');
 const compareSection = document.querySelector('#compare-section');
 const pageTitle = document.querySelector('#page-title');
 const pageSubtitle = document.querySelector('#page-subtitle');
 
 let formattedOutput = '';
+let formattedSqlOutput = '';
 
 function escapeHtml(value) {
   return String(value)
@@ -37,16 +48,80 @@ function setStatus(el, text, isError = false) {
   el.classList.toggle('error', isError);
 }
 
-function copyToClipboard(text, successText) {
+function copyToClipboard(text, successText, statusEl) {
   if (!text.trim()) {
-    setStatus(jsonStatus, 'Nothing to copy', true);
+    setStatus(statusEl, 'Nothing to copy', true);
     return;
   }
 
   navigator.clipboard
     .writeText(text)
-    .then(() => setStatus(jsonStatus, successText))
-    .catch(() => setStatus(jsonStatus, 'Copy failed. Your browser may block clipboard access.', true));
+    .then(() => setStatus(statusEl, successText))
+    .catch(() => setStatus(statusEl, 'Copy failed. Your browser may block clipboard access.', true));
+}
+
+function getSqlTemplateOptions(templateName) {
+  switch (templateName) {
+    case 'mssql-compact':
+      return {
+        keywordCase: 'upper',
+        tabWidth: 2,
+        linesBetweenQueries: 1,
+        denseOperators: true,
+        expressionWidth: 80
+      };
+    case 'mssql-reporting':
+      return {
+        keywordCase: 'upper',
+        tabWidth: 4,
+        linesBetweenQueries: 2,
+        denseOperators: false,
+        expressionWidth: 120
+      };
+    case 'mssql-wide':
+      return {
+        keywordCase: 'upper',
+        tabWidth: 2,
+        linesBetweenQueries: 1,
+        denseOperators: false,
+        expressionWidth: 140
+      };
+    case 'ansi-clean':
+      return {
+        keywordCase: 'upper',
+        tabWidth: 2,
+        linesBetweenQueries: 1,
+        denseOperators: false,
+        expressionWidth: 100
+      };
+    case 'mssql-standard':
+    default:
+      return {
+        keywordCase: 'upper',
+        tabWidth: 2,
+        linesBetweenQueries: 1,
+        denseOperators: false,
+        expressionWidth: 100
+      };
+  }
+}
+
+function normalizeSqlTerminator(sqlText) {
+  let normalized = sqlText.trimEnd();
+
+  // Insert terminators between top-level statements when input has multiple queries without ';'.
+  normalized = normalized.replace(
+    /([^\s;])\n(?=(SELECT|WITH|INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|EXEC|DECLARE)\b)/gm,
+    '$1;\n\n'
+  );
+
+  // Keep any existing terminators clean and followed by a single line break.
+  normalized = normalized.replace(/;[ \t]*(\r?\n)*/g, ';\n');
+
+  // If statement separator was inserted, preserve one blank line between statements.
+  normalized = normalized.replace(/;\n(?=(SELECT|WITH|INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|EXEC|DECLARE)\b)/gm, ';\n\n');
+
+  return normalized;
 }
 
 function primitiveMarkup(value) {
@@ -130,7 +205,7 @@ jsonInput.addEventListener('input', () => {
 });
 
 jsonCopyBtn.addEventListener('click', () => {
-  copyToClipboard(formattedOutput, 'Formatted JSON copied');
+  copyToClipboard(formattedOutput, 'Formatted JSON copied', jsonStatus);
 });
 
 jsonClearBtn.addEventListener('click', () => {
@@ -151,6 +226,57 @@ expandAllBtn.addEventListener('click', () => {
   });
 });
 
+// ==================== SQL FORMATTER ====================
+function renderFormattedSql() {
+  const raw = sqlInput.value.trim();
+
+  if (!raw) {
+    formattedSqlOutput = '';
+    sqlOutput.textContent = 'Paste SQL on the left to see formatted output.';
+    setStatus(sqlStatus, 'Ready');
+    return;
+  }
+
+  try {
+    const selectedTemplate = sqlTemplate.value;
+    const selectedLanguage = sqlLanguage.value;
+    const options = getSqlTemplateOptions(selectedTemplate);
+
+    formattedSqlOutput = formatSql(raw, {
+      language: selectedLanguage,
+      ...options
+    });
+
+    formattedSqlOutput = normalizeSqlTerminator(formattedSqlOutput);
+
+    sqlOutput.textContent = formattedSqlOutput;
+    setStatus(sqlStatus, `Auto-formatted (${selectedTemplate})`);
+  } catch (err) {
+    formattedSqlOutput = '';
+    sqlOutput.textContent = `SQL format error: ${err.message}`;
+    setStatus(sqlStatus, `SQL format error: ${err.message}`, true);
+  }
+}
+
+let sqlDebounceId;
+sqlInput.addEventListener('input', () => {
+  window.clearTimeout(sqlDebounceId);
+  sqlDebounceId = window.setTimeout(renderFormattedSql, 180);
+});
+
+sqlTemplate.addEventListener('change', renderFormattedSql);
+sqlLanguage.addEventListener('change', renderFormattedSql);
+
+sqlClearBtn.addEventListener('click', () => {
+  sqlInput.value = '';
+  renderFormattedSql();
+  setStatus(sqlStatus, 'Cleared');
+});
+
+sqlCopyBtn.addEventListener('click', () => {
+  copyToClipboard(formattedSqlOutput, 'Formatted SQL copied', sqlStatus);
+});
+
 // ==================== MODE SWITCHING ====================
 function setMode(mode) {
   modeButtons.forEach((btn) => {
@@ -159,11 +285,19 @@ function setMode(mode) {
 
   if (mode === 'json') {
     jsonSection.style.display = '';
+    sqlSection.style.display = 'none';
     compareSection.style.display = 'none';
     pageTitle.textContent = 'JSON Formatter';
     pageSubtitle.textContent = 'Auto-format and browse JSON with collapsible objects.';
+  } else if (mode === 'sql') {
+    jsonSection.style.display = 'none';
+    sqlSection.style.display = '';
+    compareSection.style.display = 'none';
+    pageTitle.textContent = 'SQL Formatter';
+    pageSubtitle.textContent = 'MSSQL-focused SQL formatting with selectable templates and dialects.';
   } else if (mode === 'compare') {
     jsonSection.style.display = 'none';
+    sqlSection.style.display = 'none';
     compareSection.style.display = '';
     pageTitle.textContent = 'Text Compare';
     pageSubtitle.textContent = 'Paste two texts to compare and see differences highlighted.';
@@ -247,3 +381,4 @@ compareClearRight.addEventListener('click', () => {
 });
 
 renderFormattedJson();
+renderFormattedSql();

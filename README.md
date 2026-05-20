@@ -41,4 +41,6 @@ This command builds the app and publishes `dist/` to the `gh-pages` branch.
 - Collapsible JSON object/array nodes
 - Expand all / Collapse all controls
 - Copy formatted output and clear input
+- SQL formatter mode focused on T-SQL (MSSQL)
+- Multiple SQL format templates (MSSQL Standard, Compact, Reporting, Wide, ANSI Clean)
 - Responsive UI for desktop and mobile
