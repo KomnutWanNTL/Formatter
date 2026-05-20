@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Formatter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-DvQlkjLY.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-A1w0FBsW.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="mode-nav">
+        <button class="mode-btn active" data-mode="json">JSON Formatter</button>
+        <button class="mode-btn" data-mode="compare">Text Compare</button>
+      </nav>
+
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Formatter Toolkit</p>
+          <h1 id="page-title">JSON Formatter</h1>
+        </div>
+        <p class="subtitle" id="page-subtitle">Auto-format and browse JSON with collapsible objects.</p>
+      </header>
+
+      <section class="split-view" id="json-section">
+        <article class="panel left-panel">
+          <div class="panel-head">
+            <h2>Before Format</h2>
+            <div class="actions">
+              <button id="json-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="json-input" spellcheck="false" placeholder='Paste JSON here, e.g. {"name":"Copilot","items":[1,2,3]}'></textarea>
+          <p class="status" id="json-status">Ready</p>
+        </article>
+
+        <article class="panel right-panel">
+          <div class="panel-head">
+            <h2>After Format</h2>
+            <div class="actions">
+              <button id="collapse-all" class="muted">Collapse All</button>
+              <button id="expand-all" class="muted">Expand All</button>
+              <button id="json-copy" class="ghost">Copy</button>
+            </div>
+          </div>
+          <div id="json-output" class="json-output"></div>
+        </article>
+      </section>
+
+      <section class="split-view compare-layout" id="compare-section" style="display: none;">
+        <article class="panel compare-panel-left">
+          <div class="panel-head">
+            <h2>Text 1</h2>
+            <div class="actions">
+              <button id="compare-clear-left" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="compare-left" spellcheck="false" placeholder='Paste first text here'></textarea>
+        </article>
+
+        <article class="panel compare-panel-right">
+          <div class="panel-head">
+            <h2>Text 2</h2>
+            <div class="actions">
+              <button id="compare-clear-right" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="compare-right" spellcheck="false" placeholder='Paste second text here'></textarea>
+        </article>
+
+        <article class="panel compare-diff-panel">
+          <div class="panel-head">
+            <h2>Text Compare</h2>
+          </div>
+          <div id="compare-output" class="compare-output"></div>
+          <p class="status" id="compare-status-left">Ready to compare</p>
+        </article>
+      </section>
+    </main>
+
+  </body>
+</html>
