@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON + SQL Formatter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Formatter Toolkit</p>
+        <h1>JSON + SQL Formatter</h1>
+        <p class="subtitle">Clean, readable text formatting in your browser.</p>
+      </header>
+
+      <section class="grid">
+        <article class="panel" id="json-panel">
+          <div class="panel-head">
+            <h2>JSON Formatter</h2>
+            <div class="actions">
+              <button id="json-format">Format</button>
+              <button id="json-minify" class="muted">Minify</button>
+              <button id="json-copy" class="ghost">Copy</button>
+              <button id="json-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="json-input" spellcheck="false" placeholder='Paste JSON here, e.g. {"name":"Copilot"}'></textarea>
+          <p class="status" id="json-status">Ready</p>
+        </article>
+
+        <article class="panel" id="sql-panel">
+          <div class="panel-head">
+            <h2>SQL Formatter</h2>
+            <div class="actions">
+              <button id="sql-format">Format</button>
+              <button id="sql-copy" class="ghost">Copy</button>
+              <button id="sql-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="sql-input" spellcheck="false" placeholder="Paste SQL here, e.g. select * from users where id=1"></textarea>
+          <div class="row-options">
+            <label for="sql-lang">Dialect</label>
+            <select id="sql-lang">
+              <option value="sql" selected>Standard SQL</option>
+              <option value="mysql">MySQL</option>
+              <option value="postgresql">PostgreSQL</option>
+              <option value="sqlite">SQLite</option>
+              <option value="tsql">T-SQL</option>
+            </select>
+          </div>
+          <p class="status" id="sql-status">Ready</p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
