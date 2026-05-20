@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSON + SQL Formatter</title>
+    <title>JSON Formatter</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,48 +13,71 @@
   </head>
   <body>
     <main class="app-shell">
-      <header class="hero">
-        <p class="eyebrow">Formatter Toolkit</p>
-        <h1>JSON + SQL Formatter</h1>
-        <p class="subtitle">Clean, readable text formatting in your browser.</p>
+      <nav class="mode-nav">
+        <button class="mode-btn active" data-mode="json">JSON Formatter</button>
+        <button class="mode-btn" data-mode="compare">Text Compare</button>
+      </nav>
+
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Formatter Toolkit</p>
+          <h1 id="page-title">JSON Formatter</h1>
+        </div>
+        <p class="subtitle" id="page-subtitle">Auto-format and browse JSON with collapsible objects.</p>
       </header>
 
-      <section class="grid">
-        <article class="panel" id="json-panel">
+      <section class="split-view" id="json-section">
+        <article class="panel left-panel">
           <div class="panel-head">
-            <h2>JSON Formatter</h2>
+            <h2>Before Format</h2>
             <div class="actions">
-              <button id="json-format">Format</button>
-              <button id="json-minify" class="muted">Minify</button>
-              <button id="json-copy" class="ghost">Copy</button>
               <button id="json-clear" class="ghost">Clear</button>
             </div>
           </div>
-          <textarea id="json-input" spellcheck="false" placeholder='Paste JSON here, e.g. {"name":"Copilot"}'></textarea>
+          <textarea id="json-input" spellcheck="false" placeholder='Paste JSON here, e.g. {"name":"Copilot","items":[1,2,3]}'></textarea>
           <p class="status" id="json-status">Ready</p>
         </article>
 
-        <article class="panel" id="sql-panel">
+        <article class="panel right-panel">
           <div class="panel-head">
-            <h2>SQL Formatter</h2>
+            <h2>After Format</h2>
             <div class="actions">
-              <button id="sql-format">Format</button>
-              <button id="sql-copy" class="ghost">Copy</button>
-              <button id="sql-clear" class="ghost">Clear</button>
+              <button id="collapse-all" class="muted">Collapse All</button>
+              <button id="expand-all" class="muted">Expand All</button>
+              <button id="json-copy" class="ghost">Copy</button>
             </div>
           </div>
-          <textarea id="sql-input" spellcheck="false" placeholder="Paste SQL here, e.g. select * from users where id=1"></textarea>
-          <div class="row-options">
-            <label for="sql-lang">Dialect</label>
-            <select id="sql-lang">
-              <option value="sql" selected>Standard SQL</option>
-              <option value="mysql">MySQL</option>
-              <option value="postgresql">PostgreSQL</option>
-              <option value="sqlite">SQLite</option>
-              <option value="tsql">T-SQL</option>
-            </select>
+          <div id="json-output" class="json-output"></div>
+        </article>
+      </section>
+
+      <section class="split-view compare-layout" id="compare-section" style="display: none;">
+        <article class="panel compare-panel-left">
+          <div class="panel-head">
+            <h2>Text 1</h2>
+            <div class="actions">
+              <button id="compare-clear-left" class="ghost">Clear</button>
+            </div>
           </div>
-          <p class="status" id="sql-status">Ready</p>
+          <textarea id="compare-left" spellcheck="false" placeholder='Paste first text here'></textarea>
+        </article>
+
+        <article class="panel compare-panel-right">
+          <div class="panel-head">
+            <h2>Text 2</h2>
+            <div class="actions">
+              <button id="compare-clear-right" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea id="compare-right" spellcheck="false" placeholder='Paste second text here'></textarea>
+        </article>
+
+        <article class="panel compare-diff-panel">
+          <div class="panel-head">
+            <h2>Text Compare</h2>
+          </div>
+          <div id="compare-output" class="compare-output"></div>
+          <p class="status" id="compare-status-left">Ready to compare</p>
         </article>
       </section>
     </main>

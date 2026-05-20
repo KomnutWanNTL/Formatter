@@ -1,8 +1,6 @@
 # Formatter Web App
 
-A lightweight web app with two tools:
-- JSON formatter and minifier
-- SQL formatter with dialect selection
+A lightweight JSON formatter web app with a full-page split view.
 
 Built with Vite + Vanilla JavaScript and ready for GitHub Pages.
 
@@ -20,6 +18,14 @@ npm run build
 npm run preview
 ```
 
+## Deploy with npm script
+
+```bash
+npm run deploy
+```
+
+This command builds the app and publishes `dist/` to the `gh-pages` branch.
+
 ## Deploy to GitHub Pages
 
 1. Push this project to a GitHub repository (default branch `main`).
@@ -30,8 +36,9 @@ npm run preview
 
 ## Features
 
-- JSON pretty-print (2 spaces)
-- JSON minify
-- SQL formatting (`sql-formatter`)
-- Copy/Clear actions
+- Full-page two-pane layout (left input, right formatted output)
+- Auto format on input change
+- Collapsible JSON object/array nodes
+- Expand all / Collapse all controls
+- Copy formatted output and clear input
 - Responsive UI for desktop and mobile
