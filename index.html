@@ -11,8 +11,8 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="./assets/index-BpI9dMuv.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CINZohhj.css">
+    <script type="module" crossorigin src="./assets/index-_wTKYRZ9.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BG7sTo_m.css">
   </head>
   <body>
     <main class="app-shell">
@@ -20,6 +20,7 @@
         <button class="mode-btn active" data-mode="json">JSON Formatter</button>
         <button class="mode-btn" data-mode="sql">SQL Formatter</button>
         <button class="mode-btn" data-mode="jwt">JWT Decode</button>
+        <button class="mode-btn" data-mode="base64">Base64 Decode</button>
         <button class="mode-btn" data-mode="compare">Text Compare</button>
       </nav>
 
@@ -139,6 +140,40 @@
               <h3>Signature</h3>
               <pre id="jwt-signature"></pre>
             </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="split-view" id="base64-section" style="display: none;">
+        <article class="panel left-panel">
+          <div class="panel-head">
+            <h2>Base64 Input</h2>
+            <div class="actions">
+              <button id="base64-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea
+            id="base64-input"
+            spellcheck="false"
+            placeholder="Paste Base64 or data URL (image/pdf), e.g. data:image/png;base64,..."
+          ></textarea>
+          <p class="status" id="base64-status">Ready</p>
+        </article>
+
+        <article class="panel right-panel">
+          <div class="panel-head">
+            <h2>Decoded Preview</h2>
+            <div class="actions">
+              <button id="base64-download" class="muted">Download</button>
+            </div>
+          </div>
+
+          <div class="base64-output" id="base64-output">
+            <div class="base64-meta" id="base64-meta"></div>
+            <p class="base64-note" id="base64-note">Decoded content preview appears here.</p>
+            <img id="base64-image-preview" class="base64-image" alt="Decoded base64 preview" />
+            <iframe id="base64-pdf-preview" class="base64-pdf" title="Decoded PDF preview"></iframe>
+            <pre id="base64-text-preview" class="base64-text-preview"></pre>
           </div>
         </article>
       </section>
