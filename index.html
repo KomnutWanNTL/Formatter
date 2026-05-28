@@ -11,14 +11,15 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="./assets/index-DWBOTqTZ.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DdR81ql0.css">
+    <script type="module" crossorigin src="./assets/index-BpI9dMuv.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CINZohhj.css">
   </head>
   <body>
     <main class="app-shell">
       <nav class="mode-nav">
         <button class="mode-btn active" data-mode="json">JSON Formatter</button>
         <button class="mode-btn" data-mode="sql">SQL Formatter</button>
+        <button class="mode-btn" data-mode="jwt">JWT Decode</button>
         <button class="mode-btn" data-mode="compare">Text Compare</button>
       </nav>
 
@@ -95,6 +96,50 @@
             </div>
           </div>
           <pre id="sql-output" class="sql-output"></pre>
+        </article>
+      </section>
+
+      <section class="split-view" id="jwt-section" style="display: none;">
+        <article class="panel left-panel">
+          <div class="panel-head">
+            <h2>JWT Input</h2>
+            <div class="actions">
+              <button id="jwt-clear" class="ghost">Clear</button>
+            </div>
+          </div>
+          <textarea
+            id="jwt-input"
+            spellcheck="false"
+            placeholder="Paste JWT here, e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          ></textarea>
+          <p class="status" id="jwt-status">Ready</p>
+        </article>
+
+        <article class="panel right-panel">
+          <div class="panel-head">
+            <h2>Decoded JWT</h2>
+            <div class="actions">
+              <button id="jwt-copy" class="ghost">Copy</button>
+            </div>
+          </div>
+          <div id="jwt-output" class="jwt-output">
+            <div class="jwt-meta" id="jwt-meta"></div>
+
+            <div class="jwt-block">
+              <h3>Header</h3>
+              <pre id="jwt-header"></pre>
+            </div>
+
+            <div class="jwt-block">
+              <h3>Payload</h3>
+              <pre id="jwt-payload"></pre>
+            </div>
+
+            <div class="jwt-block">
+              <h3>Signature</h3>
+              <pre id="jwt-signature"></pre>
+            </div>
+          </div>
         </article>
       </section>
 
